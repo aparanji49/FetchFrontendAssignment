@@ -34,7 +34,7 @@ const Login: React.FC = () => {
     try {
       setLoading(true);
       await login(name.trim(), email.trim());
-      localStorage.setItem('user', name.trim());
+      localStorage.setItem('fetch_username', name.trim());
       toast.success('Pawfect Login 🐾');
       navigate('/search');
     } catch (err) {

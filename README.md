@@ -4,6 +4,10 @@
 ## Features
 
 - User login using name & email (`POST /auth/login`)
+- Search dogs with:
+  - Filter by breed
+  - Alphabetical sort (asc or desc)
+  - Paginated results
 - Secure logout using `POST /auth/logout`
 
 ## Technologies/Libraries Used

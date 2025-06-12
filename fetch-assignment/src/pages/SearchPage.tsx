@@ -1,11 +1,11 @@
 import Header from "../components/Header";
-// import Results from "../components/Results";
+import Search from "../components/Search";
 
 const SearchPage:React.FC = () => {
 return (
     <>
     <Header/>
-    {/* <Results /> */}
+    <Search />
     </>
 );
 };
