@@ -6,29 +6,30 @@ import DogCard from "./DogCard";
 import Grid from "@mui/material/Grid";
 
 import Pagination from "@mui/material/Pagination";
+import SearchFilters from "./SearchFilters";
 
 const Search: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [next, setNext] = useState<string | null>(null);
-  const [prev, setPrev] = useState<string | null>(null);
   const [dogIds, setDogIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 25;
+  const [filters, setFilters] = useState({});
 
-  const getDogs = async (page: number = 1) => {
+  const getDogs = async (page: number = 1, appliedFilters = filters) => {
     try {
       setLoading(true);
       const from = (page - 1) * pageSize;
+
       // get results from search api
-      const searchResults = await getSearchResults({ from, sort: "breed:asc" });
+      const searchResults = await getSearchResults({ ...appliedFilters, from });
       const data = searchResults.data;
+      
       setDogIds(data.resultIds);
-      setNext(data.next ?? null);
-      setPrev(data.prev ?? null);
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.total / pageSize));
+      
       // pass these dog ids into dogs api and get dogs data
       const dogsResults = await getDogsbyIDs(data.resultIds);
 
@@ -42,6 +43,18 @@ const Search: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleApplyFilters = (newFilters: any) => {
+    setFilters(newFilters);
+    getDogs(1, newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    getDogs(1, {});
+  };
+
+
   useEffect(() => {
     getDogs(1);
   }, []);
@@ -50,6 +63,8 @@ const Search: React.FC = () => {
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Browse Dogs
       </Typography>
+
+      <SearchFilters onApply={handleApplyFilters} onClear={handleClearFilters} />
 
       {loading ? (
         <Box display="flex" justifyContent="center" mt={4}>
@@ -69,7 +84,7 @@ const Search: React.FC = () => {
             <Pagination
               count={totalPages}
               page={currentPage}
-              onChange={(_, page) => getDogs(page)}
+              onChange={(_, page) => getDogs(page, filters)}
               color="secondary"
             />
           </Box>
