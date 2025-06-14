@@ -1,5 +1,4 @@
 import {
-  Box,
   TextField,
   MenuItem,
   Select,
@@ -8,21 +7,12 @@ import {
   Button,
   Typography,
   Stack,
+  Paper
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { getBreeds } from "../services/dogs";
-import { type SortOrder } from "../types";
-
-interface SearchFiltersProps {
-  onApply: (filters: {
-    breeds?: string[];
-    zipCodes?: string[];
-    ageMin?: number;
-    ageMax?: number;
-    sort?: string;
-  }) => void;
-  onClear: () => void;
-}
+import { type SearchFiltersProps, type SortOrder } from "../types";
+import { primaryButton, secondaryButton } from '../styles/buttonStyles';
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
   const [breeds, setBreeds] = useState<string[]>([]);
@@ -42,7 +32,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
         console.error("Failed to fetch breeds", error);
       }
     };
-
     fetchBreeds();
   }, []);
 
@@ -82,19 +71,33 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
   };
 
   return (
-    <Box mb={4}>
-      <Typography variant="h6" fontWeight="bold" gutterBottom>
+    <Paper
+      elevation={3}
+      sx={{
+        p: 3,
+        borderRadius: 3,
+        mb: 4,
+        backgroundColor: "#fafafa",
+      }}
+    >
+      <Typography
+        variant="h6"
+        fontWeight="bold"
+        gutterBottom
+        textAlign="left"
+      >
         Filters
       </Typography>
 
-      <Stack spacing={3}>
-         {/* Row 1: Breeds, Zip, Age Min/Max */}
-         <Stack direction="row" spacing={2} flexWrap="wrap">
-          <FormControl fullWidth sx={{ minWidth: 200 }}>
+      <Stack spacing={4}>
+        {/* Row 1: Breeds, Zip, Age Min/Max */}
+        <Stack direction="row" spacing={3} flexWrap="wrap">
+          <FormControl fullWidth sx={{ minWidth: 200, flexGrow: 1, marginBottom: '2rem' }}>
             <InputLabel>Breed</InputLabel>
             <Select
               multiple
               value={selectedBreeds}
+              sx={{marginBottom: "1rem"}}
               onChange={(e) => handleBreedChange(e.target.value as string[])}
               renderValue={(selected) =>
                 selected.length === breeds.length
@@ -130,7 +133,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
             label="Zip Code"
             value={zipCode}
             onChange={(e) => setZipCode(e.target.value)}
-            sx={{ minWidth: 160 }}
+            sx={{ minWidth: 160, flexGrow: 1 ,marginBottom: "1rem"}}
           />
 
           <TextField
@@ -145,7 +148,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
               )
             }
             inputProps={{ min: 1 }}
-            sx={{ minWidth: 120 }}
+            sx={{ minWidth: 120, flexGrow: 1,marginBottom: "1rem" }}
           />
 
           <TextField
@@ -160,17 +163,18 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
               )
             }
             inputProps={{ min: 1 }}
-            sx={{ minWidth: 120 }}
+            sx={{ minWidth: 120, flexGrow: 1 ,marginBottom: '1rem'}}
           />
         </Stack>
 
         {/* Row 2: Sorting */}
-        <Stack direction="row" spacing={2} flexWrap="wrap">
-          <FormControl sx={{ minWidth: 160 }}>
+        <Stack direction="row" spacing={3} flexWrap="wrap">
+          <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
             <InputLabel>Sort Field</InputLabel>
             <Select
               value={sortField}
               onChange={(e) => setSortField(e.target.value)}
+              label="Sort Field"
             >
               <MenuItem value="breed">Breed</MenuItem>
               <MenuItem value="name">Name</MenuItem>
@@ -178,11 +182,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 160 }}>
+          <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
             <InputLabel>Order</InputLabel>
             <Select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+              label="Order"
             >
               <MenuItem value="asc">Ascending</MenuItem>
               <MenuItem value="desc">Descending</MenuItem>
@@ -192,15 +197,25 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
 
         {/* Row 3: Buttons */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button variant="outlined" onClick={handleClear} sx={{ px: 3 }}>
+          <Button
+            variant="outlined"
+            onClick={handleClear}
+            sx={secondaryButton}
+          >
             Clear Filters
           </Button>
-          <Button variant="contained" onClick={handleApply} sx={{ px: 3 }}>
+          <Button
+            variant="contained"
+            onClick={handleApply}
+            sx={
+             primaryButton
+            }
+          >
             Apply Filters
           </Button>
         </Stack>
       </Stack>
-    </Box>
+    </Paper>
   );
 };
 

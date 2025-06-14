@@ -3,7 +3,8 @@ import './App.css'
 import { ToastContainer } from 'react-toastify';
 import Login from './components/Login';
 import SearchPage from './pages/SearchPage';
-import Favorites from './pages/Favorites';
+import Favorites from './components/Favorites';
+import { FavoritesProvider } from './context/FavoritesContext';
 function App() {
 
   return (
@@ -16,6 +17,7 @@ function App() {
     {/* Results */}
 
       {/* Routes */}
+      <FavoritesProvider>
       <Routes>
         <Route path='/' element={<Login />}/>
         <Route path='/search' element={<SearchPage/>} />
@@ -23,6 +25,7 @@ function App() {
       </Routes>
       {/* toast container - to display taost messages*/}
       <ToastContainer/>
+    </FavoritesProvider>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { type Dog, type DogSearchResponse } from "../types";
+import { type Dog, type DogSearchResponse, type Match } from "../types";
 import api from "./axiosInstance";
 
 // get all breeds
@@ -23,4 +23,11 @@ export const getSearchResults = (params: {
 // get dog result IDs
 export const getDogsbyIDs = (ids: string[]) => {
 return api.post<Dog[]>('/dogs',ids);
+};
+
+
+// get match from given dog Ids
+
+export const getMatch = (ids: string[]) => {
+  return api.post<Match>('/dogs/match', ids);
 };
