@@ -28,6 +28,7 @@ const Search: React.FC = () => {
       const data = searchResults.data;
 
       setDogIds(data.resultIds);
+      console.log(dogIds);
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.total / pageSize));
 
