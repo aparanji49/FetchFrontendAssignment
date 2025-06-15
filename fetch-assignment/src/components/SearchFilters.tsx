@@ -7,12 +7,16 @@ import {
   Button,
   Typography,
   Stack,
-  Paper
+  Paper,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { getBreeds } from "../services/dogs";
-import { type SearchFiltersProps, type SortOrder } from "../types";
-import { primaryButton, secondaryButton } from '../styles/buttonStyles';
+import { getBreeds, searchLocations } from "../services/dogs";
+import {
+  type SearchFiltersProps,
+  type SortOrder,
+  type Location,
+} from "../types";
+import { primaryButton, secondaryButton } from "../styles/buttonStyles";
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
   const [breeds, setBreeds] = useState<string[]>([]);
@@ -22,6 +26,14 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
   const [ageMax, setAgeMax] = useState<number | "">("");
   const [sortField, setSortField] = useState("breed");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  // Location filters
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCounty, setSelectedCounty] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [availableStates, setAvailableStates] = useState<string[]>([]);
+  const [availableCounties, setAvailableCounties] = useState<string[]>([]);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchBreeds = async () => {
@@ -35,11 +47,74 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
     fetchBreeds();
   }, []);
 
+  useEffect(() => {
+    const fetchLocationOptions = async () => {
+      try {
+        const response = await searchLocations({ size: 10000 });
+        const locations = response.data.results;
+
+        // Get unique sorted states
+        const uniqueStates = Array.from(
+          new Set(locations.map((l: Location) => l.state))
+        ).sort();
+        setAvailableStates(uniqueStates);
+      } catch (err) {
+        console.error("Failed to load location data", err);
+      }
+    };
+    fetchLocationOptions();
+  }, []);
+  useEffect(() => {
+    const fetchLocationOptions = async () => {
+      try {
+        const response = await searchLocations({ size: 10000 });
+        const locations = response.data.results;
+
+        // Get unique sorted states
+        const uniqueStates = Array.from(
+          new Set(locations.map((l: Location) => l.state))
+        ).sort();
+        setAvailableStates(uniqueStates);
+      } catch (err) {
+        console.error("Failed to load location data", err);
+      }
+    };
+    fetchLocationOptions();
+  }, []);
+
+  useEffect(() => {
+    const fetchFilteredLocations = async () => {
+      if (!selectedState) return;
+      try {
+        const response = await searchLocations({ states: [selectedState], size: 10000 });
+        const locations = response.data.results;
+
+        const counties = Array.from(
+          new Set(locations.map((l) => l.county))
+        ).sort();
+        const cities = Array.from(new Set(locations.map((l) => l.city))).sort();
+
+        setAvailableCounties(counties);
+        setAvailableCities(cities);
+      } catch (err) {
+        console.error("Error fetching cities/counties", err);
+      }
+    };
+    fetchFilteredLocations();
+  }, [selectedState]);
+
   const handleApply = () => {
     if ((ageMin !== "" && ageMin < 1) || (ageMax !== "" && ageMax < 1)) {
       alert("Please enter an age of at least 1 year.");
       return;
     }
+
+    const locationFilter = zipCode
+      ? { zipCodes: [zipCode] }
+      : {
+          city: selectedCity || undefined,
+          states: selectedState ? [selectedState] : undefined,
+        };
 
     onApply({
       breeds: selectedBreeds.length ? selectedBreeds : undefined,
@@ -47,6 +122,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
       ageMin: ageMin !== "" ? Number(ageMin) : undefined,
       ageMax: ageMax !== "" ? Number(ageMax) : undefined,
       sort: `${sortField}:${sortOrder}`,
+      ...locationFilter,
     });
   };
 
@@ -57,14 +133,15 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
     setAgeMax("");
     setSortField("breed");
     setSortOrder("asc");
+    setSelectedState("");
+    setSelectedCity("");
+    setSelectedCounty("");
     onClear();
   };
 
   const handleBreedChange = (value: string[]) => {
     if (value.includes("ALL")) {
-      setSelectedBreeds(
-        selectedBreeds.length === breeds.length ? [] : breeds
-      );
+      setSelectedBreeds(selectedBreeds.length === breeds.length ? [] : breeds);
     } else {
       setSelectedBreeds(value);
     }
@@ -80,24 +157,22 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
         backgroundColor: "#fafafa",
       }}
     >
-      <Typography
-        variant="h6"
-        fontWeight="bold"
-        gutterBottom
-        textAlign="left"
-      >
+      <Typography variant="h6" fontWeight="bold" gutterBottom textAlign="left">
         Filters
       </Typography>
 
       <Stack spacing={4}>
         {/* Row 1: Breeds, Zip, Age Min/Max */}
         <Stack direction="row" spacing={3} flexWrap="wrap">
-          <FormControl fullWidth sx={{ minWidth: 200, flexGrow: 1, marginBottom: '2rem' }}>
+          <FormControl
+            fullWidth
+            sx={{ minWidth: 200, flexGrow: 1, marginBottom: "2rem" }}
+          >
             <InputLabel>Breed</InputLabel>
             <Select
               multiple
               value={selectedBreeds}
-              sx={{marginBottom: "1rem"}}
+              sx={{ marginBottom: "1rem" }}
               onChange={(e) => handleBreedChange(e.target.value as string[])}
               renderValue={(selected) =>
                 selected.length === breeds.length
@@ -120,7 +195,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
                     ? "Deselect All"
                     : "Select All"}
                 </em>
-              </MenuItem>
+              </MenuItem> 
               {breeds.map((breed) => (
                 <MenuItem key={breed} value={breed}>
                   {breed}
@@ -130,25 +205,16 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
           </FormControl>
 
           <TextField
-            label="Zip Code"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            sx={{ minWidth: 160, flexGrow: 1 ,marginBottom: "1rem"}}
-          />
-
-          <TextField
             label="Age Min"
             type="number"
             value={ageMin}
             onChange={(e) =>
               setAgeMin(
-                e.target.value === ""
-                  ? ""
-                  : Math.max(1, Number(e.target.value))
+                e.target.value === "" ? "" : Math.max(1, Number(e.target.value))
               )
             }
             inputProps={{ min: 1 }}
-            sx={{ minWidth: 120, flexGrow: 1,marginBottom: "1rem" }}
+            sx={{ minWidth: 120, flexGrow: 1, marginBottom: "1rem" }}
           />
 
           <TextField
@@ -157,17 +223,68 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
             value={ageMax}
             onChange={(e) =>
               setAgeMax(
-                e.target.value === ""
-                  ? ""
-                  : Math.max(1, Number(e.target.value))
+                e.target.value === "" ? "" : Math.max(1, Number(e.target.value))
               )
             }
             inputProps={{ min: 1 }}
-            sx={{ minWidth: 120, flexGrow: 1 ,marginBottom: '1rem'}}
+            sx={{ minWidth: 120, flexGrow: 1, marginBottom: "1rem" }}
+          />
+          <TextField
+            label="Zip Code"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+            sx={{ minWidth: 160, flexGrow: 1, marginBottom: "1rem" }}
           />
         </Stack>
 
-        {/* Row 2: Sorting */}
+        {/* Row 2: Location */}
+        <Stack direction="row" spacing={3} flexWrap="wrap">
+          <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
+            <InputLabel>State</InputLabel>
+            <Select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+            >
+              {availableStates.map((s) => (
+                <MenuItem key={s} value={s}>
+                  {s}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
+            <InputLabel>County</InputLabel>
+            <Select
+              value={selectedCounty}
+              onChange={(e) => setSelectedCounty(e.target.value)}
+              disabled={!selectedState}
+            >
+              {availableCounties.map((c) => (
+                <MenuItem key={c} value={c}>
+                  {c}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
+            <InputLabel>City</InputLabel>
+            <Select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              disabled={!selectedState}
+            >
+              {availableCities.map((c) => (
+                <MenuItem key={c} value={c}>
+                  {c}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+
+        {/* Row 3: Sorting */}
         <Stack direction="row" spacing={3} flexWrap="wrap">
           <FormControl sx={{ minWidth: 160, flexGrow: 1 }}>
             <InputLabel>Sort Field</InputLabel>
@@ -197,20 +314,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
 
         {/* Row 3: Buttons */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button
-            variant="outlined"
-            onClick={handleClear}
-            sx={secondaryButton}
-          >
+          <Button variant="outlined" onClick={handleClear} sx={secondaryButton}>
             Clear Filters
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleApply}
-            sx={
-             primaryButton
-            }
-          >
+          <Button variant="contained" onClick={handleApply} sx={primaryButton}>
             Apply Filters
           </Button>
         </Stack>

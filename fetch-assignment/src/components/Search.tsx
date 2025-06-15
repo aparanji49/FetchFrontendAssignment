@@ -65,7 +65,7 @@ const Search: React.FC = () => {
   };
 
   return (
-    <Box p={4}>
+    <Box p={4} sx={{backgroundColor: "#f9f7f2"}}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Browse Dogs
       </Typography>
@@ -89,9 +89,9 @@ const Search: React.FC = () => {
             </Box>
           ) : (
             <>
-              <Grid container spacing={3}>
+              <Grid container spacing={6} justifyContent="center">
                 {dogs.map((dog) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} display="flex" key={dog.id}>
+                  <Grid item xs={12} sm={6} md={4} lg={3} display="flex"  key={dog.id}>
                     <DogCard
                       dog={dog}
                       isFavorite={favoriteIds.includes(dog.id)}

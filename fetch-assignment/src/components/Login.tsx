@@ -11,6 +11,7 @@ import { login } from "../services/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import img1 from "../assets/dog.png";
+import { primaryButton } from "../styles/buttonStyles";
 
 const Login: React.FC = () => {
   const [name, setName] = useState("");
@@ -132,15 +133,7 @@ const Login: React.FC = () => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{
-              mt: 2,
-              bgcolor: "#000000",
-              color: "#fff",
-              "&:hover": { bgcolor: "#333333" },
-              borderRadius: 2,
-              fontWeight: 600,
-              textTransform: "none",
-            }}
+            sx={primaryButton}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}

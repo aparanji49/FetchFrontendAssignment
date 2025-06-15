@@ -8,15 +8,15 @@ export interface Dog {
 }
 
 export interface Location {
-  zip_code: string;
-  latitude: number;
-  longitude: number;
-  city: string;
-  state: string;
-  county: string;
+    zip_code: string;
+    latitude: number;
+    longitude: number;
+    city: string;
+    state: string;
+    county: string;
 }
 
-export interface Coordinates {
+export interface DogCoordinates {
   lat: number;
   lon: number;
 }
@@ -39,10 +39,13 @@ export interface DogSearchResponse {
 export interface Match {
   match: string;
 }
+
 export interface FavoritesContextType {
   favoriteIds: string[];
   toggleFavorite: (id: string) => void;
   clearFavorites: () => void;
+  matchId: string | null;
+  setMatchId: (id: string | null) => void;
 }
 
 
