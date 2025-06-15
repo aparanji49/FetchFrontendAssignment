@@ -1,7 +1,5 @@
 // // styles/buttonStyles.ts
 
-import { color } from "framer-motion";
-
 // export const primaryButton = {
 //   bgcolor: '#000000',                  // Black background
 //   color: '#ffffff',                    // White text

@@ -51,7 +51,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
     const fetchLocationOptions = async () => {
       try {
         const response = await searchLocations({ size: 10000 });
-        const locations = response.data.results;
+        const locations = response.data.results as unknown as Location[];
 
         // Get unique sorted states
         const uniqueStates = Array.from(
@@ -68,7 +68,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
     const fetchLocationOptions = async () => {
       try {
         const response = await searchLocations({ size: 10000 });
-        const locations = response.data.results;
+        const locations = response.data.results as unknown as Location[];
 
         // Get unique sorted states
         const uniqueStates = Array.from(
@@ -87,7 +87,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onApply, onClear }) => {
       if (!selectedState) return;
       try {
         const response = await searchLocations({ states: [selectedState], size: 10000 });
-        const locations = response.data.results;
+        const locations = response.data.results as unknown as Location[];
 
         const counties = Array.from(
           new Set(locations.map((l) => l.county))

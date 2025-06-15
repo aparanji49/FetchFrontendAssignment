@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Grid } from "@mui/material";
+import { Box, Button, Typography} from "@mui/material";
 import Header from "./Header";
 import { useEffect, useState } from "react";
 import { getDogsbyIDs, getMatch, getLocations } from "../services/dogs";
@@ -51,7 +51,7 @@ const Favorites: React.FC = () => {
     // get location for matched dog's zip code
 
     const locationResponse = await getLocations([matchedDog.zip_code]);
-    setMatchLocation(locationResponse.data[0]);
+    setMatchLocation(locationResponse.data[0] as unknown as Location);
 
     setShowConfetti(true);
 
@@ -195,17 +195,22 @@ const Favorites: React.FC = () => {
               </motion.div>
             )}
 
-            <Grid container spacing={3}>
+           <Box
+  display="flex"
+  flexWrap="wrap"
+  justifyContent="center"
+  gap={4}
+>
               {dogs.map((dog) => (
-                <Grid item xs={12} sm={6} md={4} key={dog.id}>
+                <Box key={dog.id} width={{ xs: "100%", sm: "45%", md: "30%", lg: "22%" }}>
                   <DogCard
                     dog={dog}
                     isFavorite={true}
                     onToggleFavorite={() => {}}
                   />
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
           </>
         )}
       </Box>

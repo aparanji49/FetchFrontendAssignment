@@ -1,10 +1,8 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import type { Dog } from "../types";
+import type { Dog, DogSearchFilters } from "../types";
 import { getDogsbyIDs, getSearchResults } from "../services/dogs";
 import DogCard from "./DogCard";
-import Grid from "@mui/material/Grid";
-
 import Pagination from "@mui/material/Pagination";
 import SearchFilters from "./SearchFilters";
 
@@ -15,7 +13,9 @@ const Search: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 25;
-  const [filters, setFilters] = useState({ sort: "breed:asc" });
+  const [filters, setFilters] = useState<DogSearchFilters>({
+    sort: "breed:asc",
+  });
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   const getDogs = async (page: number = 1, appliedFilters = filters) => {
@@ -44,7 +44,7 @@ const Search: React.FC = () => {
     }
   };
 
-  const handleApplyFilters = (newFilters: any) => {
+  const handleApplyFilters = (newFilters: DogSearchFilters) => {
     setFilters(newFilters);
     getDogs(1, newFilters);
   };
@@ -65,7 +65,7 @@ const Search: React.FC = () => {
   };
 
   return (
-    <Box p={4} sx={{backgroundColor: "#f9f7f2"}}>
+    <Box p={4} sx={{ backgroundColor: "#f9f7f2" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Browse Dogs
       </Typography>
@@ -89,17 +89,27 @@ const Search: React.FC = () => {
             </Box>
           ) : (
             <>
-              <Grid container spacing={6} justifyContent="center">
+              <Box
+                display="grid"
+                gridTemplateColumns={{
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr",
+                  lg: "1fr 1fr 1fr 1fr",
+                }}
+                gap={4}
+                justifyContent="center"
+              >
                 {dogs.map((dog) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} display="flex"  key={dog.id}>
+                  <Box key={dog.id} display="flex" justifyContent="center">
                     <DogCard
                       dog={dog}
                       isFavorite={favoriteIds.includes(dog.id)}
                       onToggleFavorite={toggleFavorite}
                     />
-                  </Grid>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
               <Box display="flex" justifyContent="center" mt={4}>
                 <Pagination
